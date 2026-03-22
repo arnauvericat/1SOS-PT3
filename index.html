@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoIT Reuse Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00c87a;
+    --green-dim: #009958;
+    --bg: #0a0f0d;
+    --bg2: #101810;
+    --bg3: #162014;
+    --card: #111a13;
+    --border: #1e3020;
+    --text: #d4e8d4;
+    --muted: #6a8c6a;
+    --white: #f0f7f0;
+    --accent: #b4ff6a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.35;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(10,15,13,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.4;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,200,122,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    max-width: 900px;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,200,122,0.08);
+    border: 1px solid rgba(0,200,122,0.2);
+    color: var(--green);
+    padding: 6px 16px;
+    border-radius: 2px;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: var(--white);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.35s forwards;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+    position: relative;
+  }
+
+  .hero-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.5s forwards;
+  }
+
+  .hero-cta {
+    margin-top: 48px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.65s forwards;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: all 0.25s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0f0d;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover {
+    background: #c8ff7a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(180,255,106,0.25);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* STATS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat {
+    background: var(--bg);
+    padding: 48px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .stat:hover::before { opacity: 1; }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 3.5rem;
+    color: var(--accent);
+    line-height: 1;
+    display: block;
+  }
+
+  .stat-label {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 100px 48px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    margin-bottom: 64px;
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--green);
+    letter-spacing: 0.2em;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    color: var(--white);
+    letter-spacing: -0.03em;
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--white);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  /* PROBLEM */
+  .problem-bg { background: var(--bg2); }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+
+  .problem-text p {
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .tag {
+    background: rgba(0,200,122,0.06);
+    border: 1px solid rgba(0,200,122,0.15);
+    color: var(--green);
+    padding: 5px 14px;
+    border-radius: 2px;
+    font-size: 0.73rem;
+    letter-spacing: 0.05em;
+  }
+
+  .cause-list {
+    list-style: none;
+    margin-top: 16px;
+  }
+
+  .cause-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.88rem;
+  }
+
+  .cause-list li::before {
+    content: '→';
+    color: var(--green);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* OBJECTIVES */
+  .obj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+  }
+
+  .obj-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .obj-card:hover {
+    border-color: rgba(0,200,122,0.4);
+    transform: translateY(-4px);
+  }
+
+  .obj-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .obj-card:hover::after { transform: scaleX(1); }
+
+  .obj-icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+  }
+
+  .obj-card p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+
+  /* FLOW */
+  .flow-bg { background: var(--bg3); }
+
+  .flow-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .flow-step {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 28px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: border-color 0.3s;
+  }
+
+  .flow-step.visible {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.5s, transform 0.5s, border-color 0.3s;
+  }
+
+  .flow-step:hover { border-color: var(--green); }
+
+  .flow-arrow {
+    display: flex;
+    justify-content: center;
+    padding: 6px 0;
+    color: var(--green);
+    font-size: 1.2rem;
+  }
+
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--green);
+    opacity: 0.3;
+    min-width: 32px;
+  }
+
+  .step-info h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    color: var(--white);
+    font-size: 0.95rem;
+  }
+
+  .step-info p {
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+
+  /* COMPONENTS */
+  .comp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .comp-block {
+    background: var(--card);
+    padding: 32px;
+    transition: background 0.3s;
+  }
+
+  .comp-block:hover { background: var(--bg3); }
+
+  .comp-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .comp-title::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1px;
+    background: var(--accent);
+  }
+
+  .comp-items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .comp-items li {
+    color: var(--text);
+    font-size: 0.83rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .comp-items li::before {
+    content: '▸';
+    color: var(--green);
+    font-size: 0.7rem;
+  }
+
+  /* BENEFICIARIS */
+  .ben-bg { background: var(--bg2); }
+
+  .ben-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .ben-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 24px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .ben-card:hover {
+    border-color: rgba(0,200,122,0.35);
+    background: var(--bg3);
+  }
+
+  .ben-icon {
+    font-size: 2.2rem;
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .ben-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    color: var(--white);
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+
+  .ben-card p {
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  /* KPI */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .kpi-block h3 { margin-bottom: 24px; }
+
+  .kpi-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .kpi-label {
+    flex: 1;
+    color: var(--text);
+    font-size: 0.83rem;
+  }
+
+  .kpi-bar-wrap {
+    flex: 1;
+    background: var(--border);
+    border-radius: 1px;
+    height: 4px;
+    overflow: hidden;
+  }
+
+  .kpi-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--accent));
+    border-radius: 1px;
+    width: 0;
+    transition: width 1.2s ease;
+  }
+
+  /* CONCLUSION */
+  .conclusion {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .conclusion-inner {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .conclusion h2 {
+    margin-bottom: 24px;
+  }
+
+  .conclusion p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.9;
+    margin-bottom: 40px;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer p {
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.9rem;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    section { padding: 64px 24px; }
+    .hero { padding: 120px 24px 64px; }
+    .problem-grid, .kpi-grid, .comp-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span></span>
+    EcoIT Reuse Platform
+  </div>
+  <ul class="nav-links">
+    <li><a href="#problema">Problema</a></li>
+    <li><a href="#objectius">Objectius</a></li>
+    <li><a href="#flux">Procés</a></li>
+    <li><a href="#tecnologia">Tecnologia</a></li>
+    <li><a href="#avaluacio">KPIs</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inici">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-tag">
+      ◉ Economia Circular · Sostenibilitat TIC
+    </div>
+    <h1>Recuperem<br>el que <em>funciona.</em></h1>
+    <p class="hero-sub">
+      Plataforma tecnològica per recuperar equips informàtics en desús,
+      reparar-los i redistribuir-los a qui més ho necessita — reduint residus
+      electrònics i fomentant l'accés digital equitatiu.
+    </p>
+    <div class="hero-cta">
+      <a href="#objectius" class="btn btn-primary">Conèixer el projecte →</a>
+      <a href="#flux" class="btn btn-secondary">Veure el procés</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <span class="stat-num" data-target="3">0</span>
+    <span class="stat-label">Anys d'extensió de vida útil</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num" data-target="30">0</span>
+    <span class="stat-label">% de reducció de RAEE</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num" data-target="60">0</span>
+    <span class="stat-label">% d'equips reutilitzats</span>
+  </div>
+</div>
+
+<!-- PROBLEMA -->
+<section class="problem-bg" id="problema">
+  <div class="section-header reveal">
+    <span class="section-num">01 —</span>
+    <h2>La situació actual</h2>
+  </div>
+  <div class="problem-grid">
+    <div class="problem-text reveal">
+      <p>El creixement constant del sector tecnològic ha comportat un augment significatiu dels residus electrònics (RAEE). Molts dispositius informàtics es descarten prematurament, sovint abans d'haver esgotat la seva vida útil real.</p>
+      <p>Les empreses renoven els seus equips cada 3-4 anys, i la percepció que reparar és més costós que substituir accelera encara més aquest cicle de malbaratament.</p>
+      <div class="tag-list">
+        <span class="tag">Obsolescència programada</span>
+        <span class="tag">RAEE creixent</span>
+        <span class="tag">Bretxa digital</span>
+        <span class="tag">Materials valuosos perduts</span>
+      </div>
+    </div>
+    <div class="reveal">
+      <ul class="cause-list">
+        <li>Increment massiu de residus electrònics sense gestió eficient</li>
+        <li>Malbaratament de materials com el coure, alumini o liti</li>
+        <li>Augment de la petjada de carboni per fabricació de nous dispositius</li>
+        <li>Entitats socials i col·lectius vulnerables sense accés a tecnologia</li>
+        <li>Reutilització d'equips no sistematitzada ni organitzada</li>
+        <li>Processos de reciclatge que no recuperen el 100% dels materials</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- OBJECTIUS -->
+<section id="objectius">
+  <div class="section-header reveal">
+    <span class="section-num">02 —</span>
+    <h2>Objectius del projecte</h2>
+  </div>
+  <div class="obj-grid">
+    <div class="obj-card reveal">
+      <div class="obj-icon">♻️</div>
+      <h3>Reducció de RAEE</h3>
+      <p>Reduir els residus electrònics generats en un 30%, evitant que equips funcionals acabin en abocadors o processos de reciclatge prematurs.</p>
+    </div>
+    <div class="obj-card reveal">
+      <div class="obj-icon">⏳</div>
+      <h3>Extensió de vida útil</h3>
+      <p>Allargar la vida útil dels dispositius entre 3 i 5 anys addicionals mitjançant reparació, actualització de memòria i instal·lació de sistemes lleugers.</p>
+    </div>
+    <div class="obj-card reveal">
+      <div class="obj-icon">🌿</div>
+      <h3>Impacte ambiental</h3>
+      <p>Disminuir la petjada de carboni associada a la fabricació de nous dispositius i optimitzar l'ús dels recursos tecnològics existents.</p>
+    </div>
+    <div class="obj-card reveal">
+      <div class="obj-icon">🤝</div>
+      <h3>Inclusió digital</h3>
+      <p>Garantir l'accés a tecnologia bàsica per a escoles, ONG i persones amb recursos limitats, reduint la bretxa digital al territori.</p>
+    </div>
+    <div class="obj-card reveal">
+      <div class="obj-icon">🔄</div>
+      <h3>Economia circular</h3>
+      <p>Reutilitzar fins al 60% dels equips descartats, transformant el model lineal descarta-recicla en un model circular recupera-repara-redistribueix.</p>
+    </div>
+    <div class="obj-card reveal">
+      <div class="obj-icon">📊</div>
+      <h3>Sistematització</h3>
+      <p>Crear una estructura organitzada i escalable per gestionar la recollida, reparació i distribució d'equips, amb registre i traçabilitat completa.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FLUX DEL PROCÉS -->
+<section class="flow-bg" id="flux">
+  <div class="section-header reveal">
+    <span class="section-num">03 —</span>
+    <h2>Flux del procés</h2>
+  </div>
+  <div class="flow-diagram">
+
+    <div class="flow-step">
+      <span class="step-num">01</span>
+      <div class="step-info">
+        <h4>Empresa donant registra equips</h4>
+        <p>Les empreses declaren els dispositius en desús a través de la plataforma web EcoIT.</p>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+
+    <div class="flow-step">
+      <span class="step-num">02</span>
+      <div class="step-info">
+        <h4>Recollida i classificació</h4>
+        <p>La plataforma organitza la recollida i realitza una primera classificació per estat i tipus d'equip.</p>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+
+    <div class="flow-step">
+      <span class="step-num">03</span>
+      <div class="step-info">
+        <h4>Diagnòstic tècnic</h4>
+        <p>Els tècnics realitzen una avaluació completa de l'estat de cada dispositiu, determinant-ne la viabilitat.</p>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+
+    <div class="flow-step">
+      <span class="step-num">04</span>
+      <div class="step-info">
+        <h4>Reparació i actualització</h4>
+        <p>RAM, SSD, components defectuosos i sistemes operatius lleugers (Linux) per maximitzar el rendiment.</p>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+
+    <div class="flow-step">
+      <span class="step-num">05</span>
+      <div class="step-info">
+        <h4>Redistribució a beneficiaris</h4>
+        <p>Escoles, ONG i persones amb pocs recursos reben els equips a baix cost o gratuïtament.</p>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+
+    <div class="flow-step">
+      <span class="step-num">06</span>
+      <div class="step-info">
+        <h4>Reciclatge responsable (si cal)</h4>
+        <p>Els equips irrecuperables es deriven a reciclatge certificat com a última opció.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TECNOLOGIA -->
+<section id="tecnologia">
+  <div class="section-header reveal">
+    <span class="section-num">04 —</span>
+    <h2>Implementació tecnològica</h2>
+  </div>
+  <div class="comp-grid reveal">
+    <div class="comp-block">
+      <div class="comp-title">Hardware</div>
+      <ul class="comp-items">
+        <li>Ordinadors reutilitzats</li>
+        <li>Servidors de gestió</li>
+        <li>Sistemes NAS</li>
+        <li>Equipament de xarxa</li>
+        <li>Routers i switches</li>
+      </ul>
+    </div>
+    <div class="comp-block">
+      <div class="comp-title">Software</div>
+      <ul class="comp-items">
+        <li>Plataforma web de gestió</li>
+        <li>Base de dades d'inventari</li>
+        <li>Sistema de diagnòstic</li>
+        <li>SO optimitzats (Linux)</li>
+        <li>Panell d'administració</li>
+      </ul>
+    </div>
+    <div class="comp-block">
+      <div class="comp-title">Xarxa & Integració</div>
+      <ul class="comp-items">
+        <li>Accés web per a usuaris</li>
+        <li>API per a empreses</li>
+        <li>Integració amb RAEE</li>
+        <li>Traçabilitat d'equips</li>
+        <li>Notificacions automàtiques</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFICIARIS -->
+<section class="ben-bg" id="beneficiaris">
+  <div class="section-header reveal">
+    <span class="section-num">05 —</span>
+    <h2>Qui se'n beneficia</h2>
+  </div>
+  <div class="ben-grid">
+    <div class="ben-card reveal">
+      <span class="ben-icon">🏢</span>
+      <h4>Empreses</h4>
+      <p>Donen equips en desús i redueixen la seva petjada ambiental corporativa.</p>
+    </div>
+    <div class="ben-card reveal">
+      <span class="ben-icon">🏫</span>
+      <h4>Escoles</h4>
+      <p>Accedeixen a equipament informàtic funcional a baix cost per als seus alumnes.</p>
+    </div>
+    <div class="ben-card reveal">
+      <span class="ben-icon">❤️</span>
+      <h4>ONG</h4>
+      <p>Reben dispositius per desenvolupar la seva missió social sense grans inversions.</p>
+    </div>
+    <div class="ben-card reveal">
+      <span class="ben-icon">👤</span>
+      <h4>Persones</h4>
+      <p>Col·lectius vulnerables accedeixen a eines digitals bàsiques sense cost elevat.</p>
+    </div>
+    <div class="ben-card reveal">
+      <span class="ben-icon">🏛️</span>
+      <h4>Administracions</h4>
+      <p>Redueixen la complexitat i el cost de la gestió de residus electrònics públics.</p>
+    </div>
+    <div class="ben-card reveal">
+      <span class="ben-icon">🌍</span>
+      <h4>Medi ambient</h4>
+      <p>Menys producció de nous dispositius significa menys emissions i menys RAEE.</p>
+    </div>
+  </div>
+</section>
+
+<!-- AVALUACIÓ KPI -->
+<section id="avaluacio">
+  <div class="section-header reveal">
+    <span class="section-num">06 —</span>
+    <h2>Avaluació i millora</h2>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-block reveal">
+      <h3>Indicadors d'èxit</h3>
+      <div class="kpi-item">
+        <span class="kpi-label">Equips reutilitzats</span>
+        <div class="kpi-bar-wrap"><div class="kpi-bar" data-w="85"></div></div>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-label">RAEE evitats</span>
+        <div class="kpi-bar-wrap"><div class="kpi-bar" data-w="70"></div></div>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-label">CO₂ reduït</span>
+        <div class="kpi-bar-wrap"><div class="kpi-bar" data-w="60"></div></div>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-label">Beneficiaris atesos</span>
+        <div class="kpi-bar-wrap"><div class="kpi-bar" data-w="90"></div></div>
+      </div>
+    </div>
+    <div class="kpi-block reveal">
+      <h3>Indicadors de qualitat</h3>
+      <div class="kpi-item">
+        <span class="kpi-label">Equips reparats amb èxit</span>
+        <div class="kpi-bar-wrap"><div class="kpi-bar" data-w="78"></div></div>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-label">Eficiència energètica</span>
+        <div class="kpi-bar-wrap"><div class="kpi-bar" data-w="65"></div></div>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-label">Satisfacció d'usuaris</span>
+        <div class="kpi-bar-wrap"><div class="kpi-bar" data-w="92"></div></div>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-label">Temps de reutilització</span>
+        <div class="kpi-bar-wrap"><div class="kpi-bar" data-w="55"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSIÓ -->
+<section class="conclusion">
+  <div class="conclusion-inner reveal">
+    <div class="section-header" style="justify-content:center; margin-bottom:32px;">
+      <span class="section-num">— Conclusió</span>
+    </div>
+    <h2>Un model tecnològic<br>més <em style="font-style:normal;color:var(--accent);">responsable</em></h2>
+    <p>
+      EcoIT Reuse Platform representa una solució viable i sostenible per afrontar el problema dels residus electrònics, transformant equips descartats en recursos útils.<br><br>
+      Mitjançant la reparació i la reutilització, el projecte no només redueix l'impacte ambiental, sinó que també contribueix a disminuir la bretxa digital i a fomentar un model tecnològic més conscient i equitatiu.
+    </p>
+    <a href="#inici" class="btn btn-primary">↑ Tornar a l'inici</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">EcoIT Reuse Platform</span>
+  <p>Economia circular aplicada a les TIC · Model sostenible de reutilització</p>
+  <p style="color:var(--green); font-size:0.72rem; letter-spacing:0.1em;">REDUCE · REPAIR · REUSE</p>
+</footer>
+
+<script>
+  // COUNTER ANIMATION
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target);
+    const duration = 1800;
+    const start = performance.now();
+    function update(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const suffix = el.dataset.target >= 3 && el.dataset.target <= 5 ? '' : '%';
+      el.textContent = Math.round(eased * target) + (target > 5 ? '%' : '');
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  // INTERSECTION OBSERVER
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+
+        // counters
+        if (entry.target.classList.contains('stat-num')) {
+          animateCounter(entry.target);
+        }
+
+        // KPI bars
+        entry.target.querySelectorAll && entry.target.querySelectorAll('.kpi-bar').forEach(bar => {
+          setTimeout(() => { bar.style.width = bar.dataset.w + '%'; }, 200);
+        });
+
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  // OBSERVE REVEALS
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  document.querySelectorAll('.stat-num').forEach(el => observer.observe(el));
+  document.querySelectorAll('.kpi-block').forEach(el => observer.observe(el));
+
+  // FLOW STEPS STAGGER
+  const flowObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const steps = document.querySelectorAll('.flow-step');
+        steps.forEach((step, i) => {
+          setTimeout(() => step.classList.add('visible'), i * 120);
+        });
+        flowObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const flowDiagram = document.querySelector('.flow-diagram');
+  if (flowDiagram) flowObserver.observe(flowDiagram);
+
+  // SMOOTH ACTIVE NAV
+  const sections = document.querySelectorAll('section[id], div.stats');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - 120) {
+        current = sec.id || '';
+      }
+    });
+    navLinks.forEach(link => {
+      link.style.color = link.getAttribute('href') === '#' + current ? 'var(--accent)' : '';
+    });
+  });
+</script>
+</body>
+</html>
